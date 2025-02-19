@@ -28,6 +28,7 @@ def fetch_and_publish_stats(container):
         msg.net_io = f"{stats['networks']['eth0']['rx_bytes']} / {stats['networks']['eth0']['tx_bytes']}"
         msg.block_io = f"{stats['blkio_stats']['io_service_bytes_recursive']}"
         msg.pids = stats['pids_stats']['current']
+        msg.timestamp = rospy.Time.now()
 
         pub.publish(msg)
     except Exception as e:
