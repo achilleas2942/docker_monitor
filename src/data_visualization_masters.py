@@ -15,7 +15,8 @@ def compute_cpu_percentage(timestamps, usages):
     du = np.diff(usages)
     with np.errstate(divide='ignore', invalid='ignore'):
         cpu_pct = (du / dt) * 100
-        cpu_pct = np.insert(cpu_pct, 0, np.nan)
+        cpu_pct = np.insert(cpu_pct, 0, cpu_pct[0])
+        cpu_pct = np.insert(cpu_pct, 0, cpu_pct[0])
     return cpu_pct
 
 def extract_master_cpu_from_bag(bag_path):
@@ -46,7 +47,8 @@ def main():
                 continue
             cpu_pct = compute_cpu_percentage(times, usages) / 10.0  # Normalize as in your previous logic
             t = np.array(times) - times[0]
-            custom_labels = ["10 Pairs", "20 Pairs"]
+            t = np.insert(t, 0, 0)  # Ensure the first time is zero
+            custom_labels = ["5 Pairs", "10 Pairs", "20 Pairs"]
             label = custom_labels[i]
             plt.plot(t, cpu_pct, label=label)
 
@@ -56,8 +58,8 @@ def main():
         # plt.grid(True)
         plt.legend(fontsize=6, loc='upper right')
         plt.tight_layout()
-        plt.ylim(10, 35)
-        plt.xlim(0, 100)
+        plt.ylim(0, 35)
+        plt.xlim(0, 80)
         plt.subplots_adjust(right=0.75)
         plt.savefig("/home/oem/Downloads/master_cpu_comparison.pdf", bbox_inches="tight")
         plt.savefig("/home/oem/Downloads/master_cpu_comparison.png", bbox_inches="tight")
