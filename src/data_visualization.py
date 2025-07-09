@@ -90,14 +90,18 @@ def plot_cpu_timeseries(uav_data, ground_data, master_data):
         # UAV subplot
         for name, label, color in lines_to_plot:
             data = uav_data[name]
-            cpu_pct = compute_cpu_percentage(data["time"], data["cpu"]) / 10    # Normalize time for uav containers
+            cpu_pct = compute_cpu_percentage(data["time"], data["cpu"]) / 11    # Normalize time for uav containers
+            cpu_pct = np.insert(cpu_pct, 0, cpu_pct[0])
             if data["time"]:
                 t = np.array(data["time"]) - data["time"][0]  # normalize
+                t = np.insert(t, 0, 0)
                 # label = custom_labels.get(name, name)
                 ax1.plot(t, cpu_pct, label=label, color=color)
-        ax1.set_xlim([0, 28.5])
-        ax1.set_ylim([65, 110])
-        ax1.set_yticks(np.arange(65, 115, 15))
+                ax1.axhline(y=100, linestyle='--')
+                ax1.axhline(y=65, linestyle='--')
+        ax1.set_xlim([0, 150])
+        ax1.set_ylim([60, 105])
+        ax1.set_yticks(np.arange(60, 105, 10))
         ax1.set_ylabel(r"CPU $(\%)$", fontsize=10)
         ax1.set_title("(a) UAV Containers")
         # ax1.grid(True)
@@ -106,24 +110,34 @@ def plot_cpu_timeseries(uav_data, ground_data, master_data):
         # Ground robot subplot
         for i, (name, data) in enumerate(sorted(ground_data.items())):
             cpu_pct = compute_cpu_percentage(data["time"], data["cpu"])
+            cpu_pct = np.insert(cpu_pct, 0, cpu_pct[0])
             if data["time"]:
                 t = np.array(data["time"]) - data["time"][0]  # normalize
+                t = np.insert(t, 0, 0)
                 ax2.plot(t, cpu_pct, label=None, color=colors[i])
-        ax2.set_xlim([0, 28.5])
-        ax2.set_ylim([16, 22])
-        ax2.set_yticks(np.arange(16, 24, 2))
+                ax2.axhline(y=23, linestyle='--')
+                ax2.axhline(y=15, linestyle='--')
+        ax2.set_xlim([0, 150])
+        ax2.set_ylim([13, 25])
+        ax2.set_yticks(np.arange(13, 26, 3))
         ax2.set_ylabel(r"CPU $(\%)$", fontsize=10)
         ax2.set_title("(b) UGV Containers")
         # ax2.grid(True)
         
         for name, data in sorted(master_data.items()):
             cpu_pct = compute_cpu_percentage(data["time"], data["cpu"]) / 10  # Normalize time for master container
+            cpu_pct = np.insert(cpu_pct, 0, cpu_pct[0])
+            cpu_pct = np.insert(cpu_pct, len(cpu_pct) - 1, cpu_pct[len(cpu_pct) - 1])
             if data["time"]:
                 t = np.array(data["time"]) - data["time"][0]  # normalize
+                t = np.insert(t, 0, 0)
+                t = np.append(t, 150)
                 ax3.plot(t, cpu_pct, label="Watcher")
-        ax3.set_xlim([0, 28.5])
-        ax3.set_ylim([10, 30])
-        ax3.set_yticks(np.arange(10, 35, 10))
+                ax3.axhline(y=30, linestyle='--')
+                ax3.axhline(y=18, linestyle='--')
+        ax3.set_xlim([0, 150])
+        ax3.set_ylim([14, 34])
+        ax3.set_yticks(np.arange(14, 35, 4))
         ax3.set_xlabel(r"time $(s)$", fontsize=10)
         ax3.set_ylabel(r"CPU $(\%)$", fontsize=10)
         ax3.set_title("(c) Master Container")
@@ -143,11 +157,11 @@ def plot_cpu_timeseries(uav_data, ground_data, master_data):
         plt.subplots_adjust(right=0.78)  
         plt.savefig("/home/oem/Downloads/docker_cpu_timeseries.pdf", bbox_inches="tight")
         plt.savefig("/home/oem/Downloads/docker_cpu_timeseries.png", bbox_inches="tight")
-        plt.show()
+        # plt.show()
 
 
 def main():
-    bag_path = "/home/oem/Downloads/bag_250507_1419.bag"
+    bag_path = "/home/oem/Downloads/bags/bag_250507_1448.bag"
     uav_data, ground_data, master_data = extract_cpu_data(bag_path)
     plot_cpu_timeseries(uav_data, ground_data, master_data)
 
