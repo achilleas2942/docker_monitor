@@ -67,7 +67,12 @@ def extract_master_cpu_from_bag(bag_path):
 
 
 def plot_combined(uav_data, ground_data, bag_dir):
-    fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(4.0, 5.5), sharex=False)
+    fig = plt.figure(figsize=(4.0, 5.5))
+    gs = fig.add_gridspec(3, 1, height_ratios=[1, 1, 1], hspace=0.3)
+    ax1 = fig.add_subplot(gs[0])
+    ax2 = fig.add_subplot(gs[1])
+    # Leave gap between ax2 and ax3 for the pairs legend
+    ax3 = fig.add_subplot(gs[2])
 
     custom_labels = {f"rotor_cbf{i}": f"Pair {i}" for i in range(1, 21)}
     colors = get_n_colors(len(uav_data))
@@ -137,7 +142,9 @@ def plot_combined(uav_data, ground_data, bag_dir):
                ncol=5, fontsize=6, frameon=False)
 
     plt.tight_layout()
-    plt.subplots_adjust(hspace=0.9)
+    # Shift ax3 down to make room for legend between ax2 and ax3
+    pos3 = ax3.get_position()
+    ax3.set_position([pos3.x0, pos3.y0 - 0.08, pos3.width, pos3.height])
     plt.savefig("/monitor/docker_cpu_combined.pdf", bbox_inches="tight")
     plt.savefig("/monitor/docker_cpu_combined.png", bbox_inches="tight")
 
