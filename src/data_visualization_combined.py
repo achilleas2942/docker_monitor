@@ -67,8 +67,8 @@ def extract_master_cpu_from_bag(bag_path):
 
 
 def plot_combined(uav_data, ground_data, bag_dir):
-    with plt.style.context(["science", "ieee"]):
-        plt.rcParams["text.usetex"] = False
+    # with plt.style.context(["science", "ieee"]):
+    #     plt.rcParams["text.usetex"] = False
         fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(4.0, 3.8), sharex=False)
 
         custom_labels = {f"rotor_cbf{i}": f"Pair {i}" for i in range(1, 21)}
@@ -135,11 +135,13 @@ def plot_combined(uav_data, ground_data, bag_dir):
         h1, l1 = ax1.get_legend_handles_labels()
         h3, l3 = ax3.get_legend_handles_labels()
         n = len(l1)
-        fig.legend(h1[:n//2], l1[:n//2], loc='lower center', bbox_to_anchor=(0.5, -0.06),
-                   ncol=n//2, fontsize=5, frameon=False)
-        fig.legend(h1[n//2:], l1[n//2:], loc='lower center', bbox_to_anchor=(0.5, -0.10),
-                   ncol=n - n//2, fontsize=5, frameon=False)
-        fig.legend(h3, l3, loc='lower center', bbox_to_anchor=(0.5, -0.14),
+        fig.legend(h1[:n//3], l1[:n//3], loc='lower center', bbox_to_anchor=(0.5, -0.06),
+                   ncol=n//3, fontsize=5, frameon=False)
+        fig.legend(h1[n//3:2*n//3], l1[n//3:2*n//3], loc='lower center', bbox_to_anchor=(0.5, -0.10),
+                   ncol=n - n//3, fontsize=5, frameon=False)
+        fig.legend(h1[2*n//3:], l1[2*n//3:], loc='lower center', bbox_to_anchor=(0.5, -0.14),
+                   ncol=n - 2*n//3, fontsize=5, frameon=False)
+        fig.legend(h3, l3, loc='lower center', bbox_to_anchor=(0.5, -0.18),
                    ncol=len(l3), fontsize=5, frameon=False)
 
         plt.tight_layout()
