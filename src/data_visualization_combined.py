@@ -121,24 +121,29 @@ def plot_combined(uav_data, ground_data, bag_dir):
                 continue
             cpu_pct = compute_cpu_percentage(times, usages) / 10.0
             cpu_pct = np.insert(cpu_pct, 0, cpu_pct[0])
+            cpu_pct = np.insert(cpu_pct, 0, 0)  # start from 0 CPU at t=0
             t_arr = np.array(times) - times[0]
             t_arr = np.insert(t_arr, 0, 0)
+            t_arr = np.insert(t_arr, 0, 0)  # start line from t=0
             label = custom_labels_master[i] if i < len(custom_labels_master) else os.path.basename(bag_file)
             ax3.plot(t_arr, cpu_pct, label=label)
         ax3.set_xlim([0, 80])
         ax3.set_ylim([0, 35])
+        ax3.set_yticks(np.arange(0, 40, 10))
         ax3.set_xlabel(r"time $(s)$", fontsize=10)
         ax3.set_ylabel(r"CPU $(\%)$", fontsize=10)
         ax3.set_title("(c) Master Containers")
 
-        # Horizontal legends below the figure (2 rows)
+        # Horizontal legends below the figure (3 rows)
         h1, l1 = ax1.get_legend_handles_labels()
         h3, l3 = ax3.get_legend_handles_labels()
         n = len(l1)
         fig.legend(h1[:n//2], l1[:n//2], loc='lower center', bbox_to_anchor=(0.5, -0.06),
                    ncol=n//2, fontsize=5, frameon=False)
-        fig.legend(h1[n//2:] + h3, l1[n//2:] + l3, loc='lower center', bbox_to_anchor=(0.5, -0.10),
-                   ncol=n - n//2 + len(l3), fontsize=5, frameon=False)
+        fig.legend(h1[n//2:], l1[n//2:], loc='lower center', bbox_to_anchor=(0.5, -0.10),
+                   ncol=n - n//2, fontsize=5, frameon=False)
+        fig.legend(h3, l3, loc='lower center', bbox_to_anchor=(0.5, -0.14),
+                   ncol=len(l3), fontsize=5, frameon=False)
 
         plt.tight_layout()
         plt.savefig("/monitor/docker_cpu_combined.pdf", bbox_inches="tight")
