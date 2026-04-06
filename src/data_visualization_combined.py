@@ -67,86 +67,80 @@ def extract_master_cpu_from_bag(bag_path):
 
 
 def plot_combined(uav_data, ground_data, bag_dir):
-    # with plt.style.context(["science", "ieee"]):
-    #     plt.rcParams["text.usetex"] = False
-        fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(4.0, 3.8), sharex=False)
+    fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(4.0, 4.5), sharex=False)
 
-        custom_labels = {f"rotor_cbf{i}": f"Pair {i}" for i in range(1, 21)}
-        colors = get_n_colors(len(uav_data))
+    custom_labels = {f"rotor_cbf{i}": f"Pair {i}" for i in range(1, 21)}
+    colors = get_n_colors(len(uav_data))
 
-        lines_to_plot = sorted(
-            [(name, custom_labels[name], colors[i]) for i, name in enumerate(sorted(uav_data.keys()))],
-            key=lambda x: natural_keys(x[1])
-        )
+    lines_to_plot = sorted(
+        [(name, custom_labels[name], colors[i]) for i, name in enumerate(sorted(uav_data.keys()))],
+        key=lambda x: natural_keys(x[1])
+    )
 
-        # (a) UAV subplot
-        for name, label, color in lines_to_plot:
-            data = uav_data[name]
-            cpu_pct = compute_cpu_percentage(data["time"], data["cpu"]) / 11
-            cpu_pct = np.insert(cpu_pct, 0, cpu_pct[0])
-            if data["time"]:
-                t = np.array(data["time"]) - data["time"][0]
-                t = np.insert(t, 0, 0)
-                ax1.plot(t, cpu_pct, label=label, color=color)
-                ax1.axhline(y=100, linestyle='--')
-                ax1.axhline(y=65, linestyle='--')
-        ax1.set_xlim([0, 150])
-        ax1.set_ylim([60, 105])
-        ax1.set_yticks(np.arange(60, 105, 10))
-        ax1.set_ylabel(r"CPU $(\%)$", fontsize=10)
-        ax1.set_title("(a) UAV Containers")
+    # (a) UAV subplot
+    for name, label, color in lines_to_plot:
+        data = uav_data[name]
+        cpu_pct = compute_cpu_percentage(data["time"], data["cpu"]) / 11
+        cpu_pct = np.insert(cpu_pct, 0, cpu_pct[0])
+        if data["time"]:
+            t = np.array(data["time"]) - data["time"][0]
+            t = np.insert(t, 0, 0)
+            ax1.plot(t, cpu_pct, label=label, color=color)
+            ax1.axhline(y=100, linestyle='--')
+            ax1.axhline(y=65, linestyle='--')
+    ax1.set_xlim([0, 150])
+    ax1.set_ylim([60, 105])
+    ax1.set_yticks(np.arange(60, 105, 10))
+    ax1.set_xticklabels([])  # remove x-tick labels, shared with ax2
+    ax1.set_ylabel(r"CPU $(\%)$", fontsize=10)
+    ax1.set_title("(a) UAV Containers")
 
-        # (b) UGV subplot
-        for i, (name, data) in enumerate(sorted(ground_data.items())):
-            cpu_pct = compute_cpu_percentage(data["time"], data["cpu"])
-            cpu_pct = np.insert(cpu_pct, 0, cpu_pct[0])
-            if data["time"]:
-                t = np.array(data["time"]) - data["time"][0]
-                t = np.insert(t, 0, 0)
-                ax2.plot(t, cpu_pct, label=None, color=colors[i])
-                ax2.axhline(y=23, linestyle='--')
-                ax2.axhline(y=15, linestyle='--')
-        ax2.set_xlim([0, 150])
-        ax2.set_ylim([13, 25])
-        ax2.set_yticks(np.arange(13, 26, 3))
-        ax2.set_ylabel(r"CPU $(\%)$", fontsize=10)
-        ax2.set_title("(b) UGV Containers")
+    # (b) UGV subplot
+    for i, (name, data) in enumerate(sorted(ground_data.items())):
+        cpu_pct = compute_cpu_percentage(data["time"], data["cpu"])
+        cpu_pct = np.insert(cpu_pct, 0, cpu_pct[0])
+        if data["time"]:
+            t = np.array(data["time"]) - data["time"][0]
+            t = np.insert(t, 0, 0)
+            ax2.plot(t, cpu_pct, label=None, color=colors[i])
+            ax2.axhline(y=23, linestyle='--')
+            ax2.axhline(y=15, linestyle='--')
+    ax2.set_xlim([0, 150])
+    ax2.set_ylim([13, 25])
+    ax2.set_yticks(np.arange(13, 26, 3))
+    ax2.set_ylabel(r"CPU $(\%)$", fontsize=10)
+    ax2.set_title("(b) UGV Containers")
 
-        # (c) Master containers — merged: multi-bag comparison
-        bag_files = sorted([os.path.join(bag_dir, f) for f in os.listdir(bag_dir) if f.endswith('.bag')])
-        custom_labels_master = ["5 Pairs", "10 Pairs", "20 Pairs"]
-        for i, bag_file in enumerate(bag_files):
-            times, usages = extract_master_cpu_from_bag(bag_file)
-            if not times or not usages:
-                continue
-            cpu_pct = compute_cpu_percentage(times, usages) / 10.0
-            cpu_pct[0] = 0  # replace leading NaN so line starts visible at t=0
-            t_arr = np.array(times) - times[0]
-            label = custom_labels_master[i] if i < len(custom_labels_master) else os.path.basename(bag_file)
-            ax3.plot(t_arr, cpu_pct, label=label)
-        ax3.set_xlim([0, 80])
-        ax3.set_ylim([0, 35])
-        ax3.set_yticks(np.arange(0, 40, 10))
-        ax3.set_xlabel(r"time $(s)$", fontsize=10)
-        ax3.set_ylabel(r"CPU $(\%)$", fontsize=10)
-        ax3.set_title("(c) Master Containers")
+    # (c) Master containers — merged: multi-bag comparison
+    bag_files = sorted([os.path.join(bag_dir, f) for f in os.listdir(bag_dir) if f.endswith('.bag')])
+    custom_labels_master = ["5 Pairs", "10 Pairs", "20 Pairs"]
+    for i, bag_file in enumerate(bag_files):
+        times, usages = extract_master_cpu_from_bag(bag_file)
+        if not times or not usages:
+            continue
+        cpu_pct = compute_cpu_percentage(times, usages) / 10.0
+        cpu_pct[0] = 0  # replace leading NaN so line starts visible at t=0
+        t_arr = np.array(times) - times[0]
+        label = custom_labels_master[i] if i < len(custom_labels_master) else os.path.basename(bag_file)
+        ax3.plot(t_arr, cpu_pct, label=label)
+    ax3.set_xlim([0, 80])
+    ax3.set_ylim([0, 35])
+    ax3.set_yticks(np.arange(0, 40, 10))
+    ax3.set_xlabel(r"time $(s)$", fontsize=10)
+    ax3.set_ylabel(r"CPU $(\%)$", fontsize=10)
+    ax3.set_title("(c) Master Containers")
+    ax3.legend(fontsize=7)
 
-        # Horizontal legends below the figure (3 rows)
-        h1, l1 = ax1.get_legend_handles_labels()
-        h3, l3 = ax3.get_legend_handles_labels()
-        n = len(l1)
-        fig.legend(h1[:n//3], l1[:n//3], loc='lower center', bbox_to_anchor=(0.5, -0.06),
-                   ncol=n//3, fontsize=5, frameon=False)
-        fig.legend(h1[n//3:2*n//3], l1[n//3:2*n//3], loc='lower center', bbox_to_anchor=(0.5, -0.10),
-                   ncol=n - n//3, fontsize=5, frameon=False)
-        fig.legend(h1[2*n//3:], l1[2*n//3:], loc='lower center', bbox_to_anchor=(0.5, -0.14),
-                   ncol=n - 2*n//3, fontsize=5, frameon=False)
-        fig.legend(h3, l3, loc='lower center', bbox_to_anchor=(0.5, -0.18),
-                   ncol=len(l3), fontsize=5, frameon=False)
+    # Pairs legend between ax2 and ax3
+    h1, l1 = ax1.get_legend_handles_labels()
+    n = len(l1)
+    fig.legend(h1, l1, loc='lower center', bbox_to_anchor=(0.5, 0.30),
+               ncol=n // 2, fontsize=7, frameon=False)
 
-        plt.tight_layout()
-        plt.savefig("/monitor/docker_cpu_combined.pdf", bbox_inches="tight")
-        plt.savefig("/monitor/docker_cpu_combined.png", bbox_inches="tight")
+    plt.tight_layout()
+    plt.subplots_adjust(hspace=0.55)
+    plt.savefig("/monitor/docker_cpu_combined.pdf", bbox_inches="tight")
+    plt.savefig("/monitor/docker_cpu_combined.png", bbox_inches="tight")
 
 
 def main():
