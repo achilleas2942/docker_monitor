@@ -120,11 +120,8 @@ def plot_combined(uav_data, ground_data, bag_dir):
             if not times or not usages:
                 continue
             cpu_pct = compute_cpu_percentage(times, usages) / 10.0
-            cpu_pct = np.insert(cpu_pct, 0, cpu_pct[0])
-            cpu_pct = np.insert(cpu_pct, 0, 0)  # start from 0 CPU at t=0
+            cpu_pct[0] = 0  # replace leading NaN so line starts visible at t=0
             t_arr = np.array(times) - times[0]
-            t_arr = np.insert(t_arr, 0, 0)
-            t_arr = np.insert(t_arr, 0, 0)  # start line from t=0
             label = custom_labels_master[i] if i < len(custom_labels_master) else os.path.basename(bag_file)
             ax3.plot(t_arr, cpu_pct, label=label)
         ax3.set_xlim([0, 80])
