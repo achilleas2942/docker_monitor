@@ -66,9 +66,9 @@ def extract_master_cpu_from_bag(bag_path):
     return times, usages
 
 
-def plot_combined(uav_data, ground_data, master_data, bag_dir):
+def plot_combined(uav_data, ground_data, bag_dir):
     with plt.style.context(["science", "ieee"]):
-        fig, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1, figsize=(4.0, 5.2), sharex=False)
+        fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(4.0, 3.8), sharex=False)
 
         custom_labels = {f"rotor_cbf{i}": f"Pair {i}" for i in range(1, 21)}
         colors = get_n_colors(len(uav_data))
@@ -111,26 +111,7 @@ def plot_combined(uav_data, ground_data, master_data, bag_dir):
         ax2.set_ylabel(r"CPU $(\%)$", fontsize=10)
         ax2.set_title("(b) UGV Containers")
 
-        # (c) Master (single bag)
-        for name, data in sorted(master_data.items()):
-            cpu_pct = compute_cpu_percentage(data["time"], data["cpu"]) / 10
-            cpu_pct = np.insert(cpu_pct, 0, cpu_pct[0])
-            cpu_pct = np.insert(cpu_pct, len(cpu_pct) - 1, cpu_pct[len(cpu_pct) - 1])
-            if data["time"]:
-                t = np.array(data["time"]) - data["time"][0]
-                t = np.insert(t, 0, 0)
-                t = np.append(t, 150)
-                ax3.plot(t, cpu_pct, label="Watcher")
-                ax3.axhline(y=30, linestyle='--')
-                ax3.axhline(y=18, linestyle='--')
-        ax3.set_xlim([0, 150])
-        ax3.set_ylim([14, 34])
-        ax3.set_yticks(np.arange(14, 35, 4))
-        ax3.set_ylabel(r"CPU $(\%)$", fontsize=10)
-        ax3.set_title("(c) Master Container")
-        # ax3 legend handled below
-
-        # (d) Master comparison across bags
+        # (c) Master containers — merged: multi-bag comparison
         bag_files = sorted([os.path.join(bag_dir, f) for f in os.listdir(bag_dir) if f.endswith('.bag')])
         custom_labels_master = ["5 Pairs", "10 Pairs", "20 Pairs"]
         for i, bag_file in enumerate(bag_files):
@@ -142,22 +123,21 @@ def plot_combined(uav_data, ground_data, master_data, bag_dir):
             t_arr = np.array(times) - times[0]
             t_arr = np.insert(t_arr, 0, 0)
             label = custom_labels_master[i] if i < len(custom_labels_master) else os.path.basename(bag_file)
-            ax4.plot(t_arr, cpu_pct, label=label)
-        ax4.set_xlim([0, 80])
-        ax4.set_ylim([0, 35])
-        ax4.set_xlabel(r"time $(s)$", fontsize=10)
-        ax4.set_ylabel(r"CPU $(\%)$", fontsize=10)
-        ax4.set_title("(d) Master Containers Comparison")
+            ax3.plot(t_arr, cpu_pct, label=label)
+        ax3.set_xlim([0, 150])
+        ax3.set_ylim([0, 35])
+        ax3.set_xlabel(r"time $(s)$", fontsize=10)
+        ax3.set_ylabel(r"CPU $(\%)$", fontsize=10)
+        ax3.set_title("(c) Master Containers")
 
-        # Horizontal legends below the figure
+        # Horizontal legends below the figure (2 rows)
         h1, l1 = ax1.get_legend_handles_labels()
         h3, l3 = ax3.get_legend_handles_labels()
-        h4, l4 = ax4.get_legend_handles_labels()
-
-        fig.legend(h1, l1, loc='lower center', bbox_to_anchor=(0.5, -0.06),
-                   ncol=len(l1), fontsize=5, frameon=False, title="Pairs (a/b)", title_fontsize=6)
-        fig.legend(h3 + h4, l3 + l4, loc='lower center', bbox_to_anchor=(0.5, -0.10),
-                   ncol=len(l3) + len(l4), fontsize=5, frameon=False, title="(c) / (d)", title_fontsize=6)
+        n = len(l1)
+        fig.legend(h1[:n//2], l1[:n//2], loc='lower center', bbox_to_anchor=(0.5, -0.06),
+                   ncol=n//2, fontsize=5, frameon=False)
+        fig.legend(h1[n//2:] + h3, l1[n//2:] + l3, loc='lower center', bbox_to_anchor=(0.5, -0.10),
+                   ncol=n - n//2 + len(l3), fontsize=5, frameon=False)
 
         plt.tight_layout()
         plt.savefig("/home/oem/Downloads/docker_cpu_combined.pdf", bbox_inches="tight")
@@ -168,8 +148,8 @@ def main():
     bag_path = "/home/oem/Downloads/bags/bag_250507_1448.bag"
     bag_dir = "/home/oem/Downloads/bags/"
 
-    uav_data, ground_data, master_data = extract_cpu_data(bag_path)
-    plot_combined(uav_data, ground_data, master_data, bag_dir)
+    uav_data, ground_data, _ = extract_cpu_data(bag_path)
+    plot_combined(uav_data, ground_data, bag_dir)
 
 
 if __name__ == "__main__":
