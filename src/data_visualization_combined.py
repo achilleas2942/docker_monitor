@@ -68,7 +68,7 @@ def extract_master_cpu_from_bag(bag_path):
 
 def plot_combined(uav_data, ground_data, master_data, bag_dir):
     with plt.style.context(["science", "ieee"]):
-        fig, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1, figsize=(4.0, 5.0), sharex=False)
+        fig, (ax1, ax2, ax3, ax4) = plt.subplots(4, 1, figsize=(4.0, 5.2), sharex=False)
 
         custom_labels = {f"rotor_cbf{i}": f"Pair {i}" for i in range(1, 21)}
         colors = get_n_colors(len(uav_data))
@@ -128,7 +128,7 @@ def plot_combined(uav_data, ground_data, master_data, bag_dir):
         ax3.set_yticks(np.arange(14, 35, 4))
         ax3.set_ylabel(r"CPU $(\%)$", fontsize=10)
         ax3.set_title("(c) Master Container")
-        ax3.legend(fontsize=6, loc='center left', bbox_to_anchor=(1.02, 0.5), frameon=False)
+        # ax3 legend handled below
 
         # (d) Master comparison across bags
         bag_files = sorted([os.path.join(bag_dir, f) for f in os.listdir(bag_dir) if f.endswith('.bag')])
@@ -148,20 +148,18 @@ def plot_combined(uav_data, ground_data, master_data, bag_dir):
         ax4.set_xlabel(r"time $(s)$", fontsize=10)
         ax4.set_ylabel(r"CPU $(\%)$", fontsize=10)
         ax4.set_title("(d) Master Containers Comparison")
-        ax4.legend(fontsize=6, loc='upper right')
 
-        # Shared legend for ax1/ax2 pairs
-        handles, labels = ax1.get_legend_handles_labels()
-        fig.legend(
-            handles, labels,
-            loc='center left',
-            bbox_to_anchor=(0.79, 0.72),
-            fontsize=6,
-            frameon=False
-        )
+        # Horizontal legends below the figure
+        h1, l1 = ax1.get_legend_handles_labels()
+        h3, l3 = ax3.get_legend_handles_labels()
+        h4, l4 = ax4.get_legend_handles_labels()
+
+        fig.legend(h1, l1, loc='lower center', bbox_to_anchor=(0.5, -0.06),
+                   ncol=len(l1), fontsize=5, frameon=False, title="Pairs (a/b)", title_fontsize=6)
+        fig.legend(h3 + h4, l3 + l4, loc='lower center', bbox_to_anchor=(0.5, -0.10),
+                   ncol=len(l3) + len(l4), fontsize=5, frameon=False, title="(c) / (d)", title_fontsize=6)
 
         plt.tight_layout()
-        plt.subplots_adjust(right=0.78)
         plt.savefig("/home/oem/Downloads/docker_cpu_combined.pdf", bbox_inches="tight")
         plt.savefig("/home/oem/Downloads/docker_cpu_combined.png", bbox_inches="tight")
 
