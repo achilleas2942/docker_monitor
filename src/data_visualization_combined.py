@@ -67,7 +67,7 @@ def extract_master_cpu_from_bag(bag_path):
 
 
 def plot_combined(uav_data, ground_data, bag_dir):
-    fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(4.0, 4.5), sharex=False)
+    fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(4.0, 5.5), sharex=False)
 
     custom_labels = {f"rotor_cbf{i}": f"Pair {i}" for i in range(1, 21)}
     colors = get_n_colors(len(uav_data))
@@ -124,21 +124,20 @@ def plot_combined(uav_data, ground_data, bag_dir):
         label = custom_labels_master[i] if i < len(custom_labels_master) else os.path.basename(bag_file)
         ax3.plot(t_arr, cpu_pct, label=label)
     ax3.set_xlim([0, 80])
-    ax3.set_ylim([0, 35])
-    ax3.set_yticks(np.arange(0, 40, 10))
+    ax3.set_ylim([0, 45])
+    ax3.set_yticks(np.arange(0, 50, 10))
     ax3.set_xlabel(r"time $(s)$", fontsize=10)
     ax3.set_ylabel(r"CPU $(\%)$", fontsize=10)
     ax3.set_title("(c) Master Containers")
-    ax3.legend(fontsize=7)
+    ax3.legend(fontsize=7, loc='upper right')
 
     # Pairs legend between ax2 and ax3
     h1, l1 = ax1.get_legend_handles_labels()
-    n = len(l1)
-    fig.legend(h1, l1, loc='lower center', bbox_to_anchor=(0.5, 0.30),
-               ncol=n // 2, fontsize=7, frameon=False)
+    fig.legend(h1, l1, loc='upper center', bbox_to_anchor=(0.5, 0.38),
+               ncol=5, fontsize=6, frameon=False)
 
     plt.tight_layout()
-    plt.subplots_adjust(hspace=0.55)
+    plt.subplots_adjust(hspace=0.9)
     plt.savefig("/monitor/docker_cpu_combined.pdf", bbox_inches="tight")
     plt.savefig("/monitor/docker_cpu_combined.png", bbox_inches="tight")
 
