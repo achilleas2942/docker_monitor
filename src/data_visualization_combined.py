@@ -68,6 +68,7 @@ def extract_master_cpu_from_bag(bag_path):
 
 def plot_combined(uav_data, ground_data, bag_dir):
     with plt.style.context(["science", "ieee"]):
+        plt.rcParams["text.usetex"] = False
         fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(4.0, 3.8), sharex=False)
 
         custom_labels = {f"rotor_cbf{i}": f"Pair {i}" for i in range(1, 21)}
@@ -124,7 +125,7 @@ def plot_combined(uav_data, ground_data, bag_dir):
             t_arr = np.insert(t_arr, 0, 0)
             label = custom_labels_master[i] if i < len(custom_labels_master) else os.path.basename(bag_file)
             ax3.plot(t_arr, cpu_pct, label=label)
-        ax3.set_xlim([0, 150])
+        ax3.set_xlim([0, 80])
         ax3.set_ylim([0, 35])
         ax3.set_xlabel(r"time $(s)$", fontsize=10)
         ax3.set_ylabel(r"CPU $(\%)$", fontsize=10)
@@ -140,13 +141,13 @@ def plot_combined(uav_data, ground_data, bag_dir):
                    ncol=n - n//2 + len(l3), fontsize=5, frameon=False)
 
         plt.tight_layout()
-        plt.savefig("/home/oem/Downloads/docker_cpu_combined.pdf", bbox_inches="tight")
-        plt.savefig("/home/oem/Downloads/docker_cpu_combined.png", bbox_inches="tight")
+        plt.savefig("/monitor/docker_cpu_combined.pdf", bbox_inches="tight")
+        plt.savefig("/monitor/docker_cpu_combined.png", bbox_inches="tight")
 
 
 def main():
-    bag_path = "/home/oem/Downloads/bags/bag_250507_1448.bag"
-    bag_dir = "/home/oem/Downloads/bags/"
+    bag_path = "/monitor/bag_250507_1448.bag"
+    bag_dir = "/monitor/"
 
     uav_data, ground_data, _ = extract_cpu_data(bag_path)
     plot_combined(uav_data, ground_data, bag_dir)
